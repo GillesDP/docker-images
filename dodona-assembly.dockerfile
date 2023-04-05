@@ -72,6 +72,9 @@ RUN apt-get update && \
                        qemu-user-static \
                        build-essential && \
     apt-get install -y valgrind
+    
+RUN apt-get update && \
+    apt-get install -y gcc-multilib
 
 
 USER runner
