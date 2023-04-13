@@ -62,20 +62,41 @@ RUN mkdir -p /usr/share/man/man1mkdir -p /usr/share/man/man1 \
 
 # Added for compiling and running Assembly (x86, x64, ARM, Aarch64)
 RUN apt-get update && \
-    apt-get install -y gcc-aarch64-linux-gnu \
-                       binutils-aarch64-linux-gnu \
-                       binutils-aarch64-linux-gnu-dbg && \
-    apt-get install -y gcc-arm-linux-gnueabihf \
-                       binutils-arm-linux-gnueabihf \
-                       binutils-arm-linux-gnueabihf-dbg && \
-    apt-get install -y qemu-user \
-                       qemu-user-static \
-                       build-essential && \
+    apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu binutils-aarch64-linux-gnu-dbg && \
+    apt-get install -y gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabihf-dbg && \
+    apt-get install -y qemu-user qemu-user-static build-essential && \
     apt-get install -y valgrind
     
+# Cross-compiling and installing Valgrind for Aarch64
 RUN apt-get update && \
-    apt-get install -y gcc-multilib
+    apt-get install -y wget
+RUN wget https://sourceware.org/pub/valgrind/valgrind-3.20.0.tar.bz2 && \
+    tar -xf valgrind-3.20.0.tar.bz2
+WORKDIR valgrind-3.20.0
+RUN ./configure --host=aarch64-unknown-linux --target=aarch64-unknown-linux --prefix=/opt/valgrind-aarch64 CC=aarch64-linux-gnu-gcc LD=aarch64-linux-gnu-ld CFLAGS="-static" LDFLAGS="-static"
+RUN make -j2
+RUN make install
+RUN mv /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux-orig
+WORKDIR /opt/valgrind-aarch64/libexec/valgrind
+RUN touch cachegrind-arm64-linux
+RUN echo -e '#!/bin/sh\nqemu-aarch64 /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux-orig $@' >> cachegrind-arm64-linux
+RUN chmod +x /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux
 
+# Cross-compiling and installing Valgrind for arm32
+#WORKDIR /
+#RUN wget https://sourceware.org/pub/valgrind/valgrind-3.20.0.tar.bz2 && \
+#    tar -xf valgrind-3.20.0.tar.bz2
+#WORKDIR valgrind-3.20.0
+#RUN ./configure --host=armv7-linux-gnueabihf --target=armv7-linux-gnueabihf --prefix=/opt/valgrind-arm32 CC=arm-linux-gnueabihf-gcc LD=arm-linux-gnueabihf-ld CFLAGS="-static -fPIC" LDFLAGS="-static" CXXFLAGS="-fPIC"
+#RUN make -j2
+#RUN make install
+#RUN mv /opt/valgrind-arm32/libexec/valgrind/cachegrind-arm32-linux /opt/valgrind-arm32/libexec/valgrind/cachegrind-arm32-linux-orig
+#WORKDIR /opt/valgrind-arm32/libexec/valgrind
+#RUN touch cachegrind-arm32-linux
+#RUN echo -e '#!/bin/sh\nqemu-arm /opt/valgrind-arm32/libexec/valgrind/cachegrind-arm64-linux-orig $@' >> cachegrind-arm32-linux
+#RUN chmod +x cachegrind-arm32-linux
+
+RUN apt-get remove -y binfmt-support
 
 USER runner
 WORKDIR /home/runner/workdir
