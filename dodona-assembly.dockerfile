@@ -79,7 +79,8 @@ RUN make install
 RUN mv /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux-orig
 WORKDIR /opt/valgrind-aarch64/libexec/valgrind
 RUN touch cachegrind-arm64-linux
-RUN echo -e '#!/bin/sh\nqemu-aarch64 /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux-orig $@' >> cachegrind-arm64-linux
+RUN echo '#!/bin/sh' >> cachegrind-arm64-linux
+RUN echo 'qemu-aarch64 /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux-orig $@' >> cachegrind-arm64-linux
 RUN chmod +x /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux
 
 # Cross-compiling and installing Valgrind for arm32
