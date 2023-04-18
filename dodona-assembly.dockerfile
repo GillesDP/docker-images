@@ -31,7 +31,7 @@ RUN mkdir -p /usr/share/man/man1mkdir -p /usr/share/man/man1 \
        gcc=4:10.2.1-1 \
        cppcheck=2.3-1 \
        # TESTed Javascript judge dependency
-       nodejs=18.15.0-deb-1nodesource1 \
+       nodejs \
        # TESTed bash judge dependency
        shellcheck=0.7.1-1+deb11u1 \
        # C# dependency
