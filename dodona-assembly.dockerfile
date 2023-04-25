@@ -102,7 +102,7 @@ RUN apt-get remove -y binfmt-support
 
 # Install x86 (32 bit) libraries
 RUN apt-get update && \
-    apt-get install -y libc6-dev-i386
+    apt-get install -y libc6-dev-i386 --no-install-recommends
     
 USER runner
 WORKDIR /home/runner/workdir
