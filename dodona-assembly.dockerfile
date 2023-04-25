@@ -101,8 +101,7 @@ RUN chmod +x cachegrind-arm-linux
 RUN apt-get remove -y binfmt-support
 
 # Install x86 (32 bit) libraries
-RUN dpkg --add-architecture i386 && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y libc6-dev-i386
     
 USER runner
