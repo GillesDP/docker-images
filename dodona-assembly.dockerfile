@@ -60,6 +60,10 @@ RUN mkdir -p /usr/share/man/man1mkdir -p /usr/share/man/man1 \
  && mkdir /home/runner/workdir \
  && chown -R runner:runner /home/runner/workdir
 
+# Install x86 (32 bit) libraries
+RUN apt-get update && \
+    apt-get install -y gcc-multilib
+
 # Added for compiling and running Assembly (x86, x64, ARM, Aarch64)
 RUN apt-get update && \
     apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu binutils-aarch64-linux-gnu-dbg && \
@@ -99,10 +103,6 @@ RUN echo -e '#!/bin/sh\nqemu-arm /opt/valgrind-arm32/libexec/valgrind/cachegrind
 RUN chmod +x cachegrind-arm-linux
 
 RUN apt-get remove -y binfmt-support
-
-# Install x86 (32 bit) libraries
-RUN apt-get update && \
-    apt-get install -y libc6-dev-i386 --no-install-recommends
     
 USER runner
 WORKDIR /home/runner/workdir
