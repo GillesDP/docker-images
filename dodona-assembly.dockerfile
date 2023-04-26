@@ -71,7 +71,7 @@ RUN apt-get update && \
     apt-get install -y qemu-user qemu-user-static build-essential && \
     apt-get install -y valgrind
     
-# Cross-compiling and installing Valgrind for Aarch64
+# Cross-compiling and patching Valgrind for Aarch64
 RUN apt-get update && \
     apt-get install -y wget
 RUN wget https://sourceware.org/pub/valgrind/valgrind-3.20.0.tar.bz2 && \
@@ -87,7 +87,7 @@ RUN echo '#!/bin/sh' >> cachegrind-arm64-linux
 RUN echo 'qemu-aarch64 /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux-orig $@' >> cachegrind-arm64-linux
 RUN chmod +x /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux
 
-# Cross-compiling and installing Valgrind for arm32
+# Cross-compiling and patching Valgrind for arm32
 WORKDIR /
 RUN wget https://sourceware.org/pub/valgrind/valgrind-3.20.0.tar.bz2 && \
     tar -xf valgrind-3.20.0.tar.bz2
@@ -99,8 +99,12 @@ RUN make install
 RUN mv /opt/valgrind-arm32/libexec/valgrind/cachegrind-arm-linux /opt/valgrind-arm32/libexec/valgrind/cachegrind-arm-linux-orig
 WORKDIR /opt/valgrind-arm32/libexec/valgrind
 RUN touch cachegrind-arm-linux
-RUN echo -e '#!/bin/sh\nqemu-arm /opt/valgrind-arm32/libexec/valgrind/cachegrind-arm-linux-orig $@' >> cachegrind-arm-linux
+RUN echo '#!/bin/sh' >> cachegrind-arm-linux
+RUN echo 'qemu-arm /opt/valgrind-arm32/libexec/valgrind/cachegrind-arm-linux-orig $@' >> cachegrind-arm-linux
 RUN chmod +x cachegrind-arm-linux
+RUN dpkg --add-architecture armhf && \
+    apt-get update && \
+    apt-get install -y libc6:armhf
 
 RUN apt-get remove -y binfmt-support
     
