@@ -75,7 +75,7 @@ RUN apt-get update && \
 RUN wget https://download.qemu.org/qemu-8.0.0.tar.xz && \
     tar xvJf qemu-8.0.0.tar.xz
 WORKDIR qemu-8.0.0
-RUN ./configure --target-list=aarch64-linux-user,arm32-linux-user
+RUN ./configure --target-list=aarch64-linux-user,arm-linux-user
 RUN make -j2 && make install
 
 # Cross-compiling and patching Valgrind for Aarch64
