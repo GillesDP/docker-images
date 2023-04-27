@@ -68,12 +68,18 @@ RUN apt-get update && \
 RUN apt-get update && \
     apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu binutils-aarch64-linux-gnu-dbg && \
     apt-get install -y gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabihf-dbg && \
-    apt-get install -y qemu-user qemu-user-static build-essential && \
-    apt-get install -y valgrind
-    
+    apt-get install -y ninja-build bison flex libpixman-1-dev libglib2.0-dev pkg-config ninja-build build-essential && \
+    apt-get install -y valgrind wget
+
+# Compile qemu-user
+RUN wget https://download.qemu.org/qemu-8.0.0.tar.xz && \
+    tar xvJf qemu-8.0.0.tar.xz
+WORKDIR qemu-8.0.0
+RUN ./configure --target-list=aarch64-linux-user,arm32-linux-user
+RUN make -j2 && make install
+
 # Cross-compiling and patching Valgrind for Aarch64
-RUN apt-get update && \
-    apt-get install -y wget
+WORKDIR /
 RUN wget https://sourceware.org/pub/valgrind/valgrind-3.20.0.tar.bz2 && \
     tar -xf valgrind-3.20.0.tar.bz2
 WORKDIR valgrind-3.20.0
@@ -88,10 +94,7 @@ RUN echo 'qemu-aarch64 /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-l
 RUN chmod +x /opt/valgrind-aarch64/libexec/valgrind/cachegrind-arm64-linux
 
 # Cross-compiling and patching Valgrind for arm32
-WORKDIR /
-RUN wget https://sourceware.org/pub/valgrind/valgrind-3.20.0.tar.bz2 && \
-    tar -xf valgrind-3.20.0.tar.bz2
-WORKDIR valgrind-3.20.0
+WORKDIR /valgrind-3.20.0
 RUN make distclean
 RUN ./configure --host=armv7-linux-gnueabihf --target=armv7-linux-gnueabihf --prefix=/opt/valgrind-arm32 CC=arm-linux-gnueabihf-gcc LD=arm-linux-gnueabihf-ld CFLAGS="-fPIC" LDFLAGS="" CXXFLAGS="-fPIC"
 RUN make -j2
@@ -107,7 +110,9 @@ RUN dpkg --add-architecture armhf && \
     apt-get install -y libc6:armhf
 
 RUN apt-get remove -y binfmt-support
-    
+
+# TODO (voor begeleiders): cleanup de packages en de tijdelijke files en autoremove
+
 USER runner
 WORKDIR /home/runner/workdir
 
